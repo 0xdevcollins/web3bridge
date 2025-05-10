@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SAVINGS_TIERS } from '@/constants/savings';
 import { Tier } from '@/types/savings';
 import { useRouter } from 'next/navigation';
+import { NairaIcon } from './NairaIcon';
 
 export default function StudentRegistration() {
   const [name, setName] = useState('');
@@ -79,7 +80,7 @@ export default function StudentRegistration() {
                   </div>
                   <div className="ml-4">
                     <h4 className="text-lg font-semibold text-gray-900">{tier.name}</h4>
-                    <p className="text-gray-600">₦{tier.amount.toLocaleString()}</p>
+                    <p className="text-gray-600"><NairaIcon />{tier.amount.toLocaleString()}</p>
                     <p className="text-sm text-indigo-600 font-medium">{tier.interestRate}% weekly interest</p>
                   </div>
                 </div>
