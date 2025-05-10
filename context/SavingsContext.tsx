@@ -1,6 +1,13 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Student, SavingsGroup, Tier } from '@/types/savings';
-import { MAX_STUDENTS } from '@/constants/savings';
+"use client";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { Student, SavingsGroup, Tier } from "@/types/savings";
+import { MAX_STUDENTS } from "@/constants/savings";
 
 interface SavingsContextType {
   savingsGroup: SavingsGroup;
@@ -12,17 +19,17 @@ interface SavingsContextType {
 
 const SavingsContext = createContext<SavingsContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'savings-group-data';
+const STORAGE_KEY = "savings-group-data";
 
 export function SavingsProvider({ children }: { children: ReactNode }) {
   const [savingsGroup, setSavingsGroup] = useState<SavingsGroup>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const savedData = localStorage.getItem(STORAGE_KEY);
       if (savedData) {
         const parsed = JSON.parse(savedData);
         parsed.students = parsed.students.map((student: Student) => ({
           ...student,
-          joinedAt: new Date(student.joinedAt)
+          joinedAt: new Date(student.joinedAt),
         }));
         return parsed;
       }
@@ -35,7 +42,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(savingsGroup));
     }
   }, [savingsGroup]);
@@ -50,7 +57,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
   const addStudent = (name: string, tier: Tier) => {
     if (savingsGroup.students.length >= MAX_STUDENTS) {
-      throw new Error('Maximum number of students reached');
+      throw new Error("Maximum number of students reached");
     }
 
     const newStudent: Student = {
@@ -58,8 +65,22 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       name,
       tier,
       joinedAt: new Date(),
-      weeklyInterest: calculateWeeklyInterest({ id: '', name, tier, joinedAt: new Date(), weeklyInterest: 0, totalAmount: 0 }),
-      totalAmount: calculateTotalAmount({ id: '', name, tier, joinedAt: new Date(), weeklyInterest: 0, totalAmount: 0 }),
+      weeklyInterest: calculateWeeklyInterest({
+        id: "",
+        name,
+        tier,
+        joinedAt: new Date(),
+        weeklyInterest: 0,
+        totalAmount: 0,
+      }),
+      totalAmount: calculateTotalAmount({
+        id: "",
+        name,
+        tier,
+        joinedAt: new Date(),
+        weeklyInterest: 0,
+        totalAmount: 0,
+      }),
     };
 
     setSavingsGroup((prev) => ({
@@ -100,7 +121,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 export function useSavings() {
   const context = useContext(SavingsContext);
   if (context === undefined) {
-    throw new Error('useSavings must be used within a SavingsProvider');
+    throw new Error("useSavings must be used within a SavingsProvider");
   }
   return context;
-} 
+}

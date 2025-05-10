@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useSavings } from '@/context/SavingsContext';
 import { SAVINGS_TIERS } from '@/constants/savings';
 import { Tier } from '@/types/savings';
 import { useRouter } from 'next/navigation';
 import { NairaIcon } from './NairaIcon';
+import { Button } from './ui/button';
 
 export default function StudentRegistration() {
   const [name, setName] = useState('');
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addStudent, calculateWeeklyInterest, calculateTotalAmount } = useSavings();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,6 +34,7 @@ export default function StudentRegistration() {
     }
 
     try {
+      addStudent(name.trim(), selectedTier);
       await new Promise(resolve => setTimeout(resolve, 500));
       router.push('/');
     } catch (err) {
@@ -60,7 +64,7 @@ export default function StudentRegistration() {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Choose Your Savings Tier</h3>
           <div className="grid gap-4">
-          {SAVINGS_TIERS.map((tier) => (
+            {SAVINGS_TIERS.map((tier) => (
               <div
                 key={tier.id}
                 className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
@@ -80,7 +84,7 @@ export default function StudentRegistration() {
                   </div>
                   <div className="ml-4">
                     <h4 className="text-lg font-semibold text-gray-900">{tier.name}</h4>
-                    <p className="text-gray-600"><NairaIcon />{tier.amount.toLocaleString()}</p>
+                    <p className="text-gray-600">₦{tier.amount.toLocaleString()}</p>
                     <p className="text-sm text-indigo-600 font-medium">{tier.interestRate}% weekly interest</p>
                   </div>
                 </div>
@@ -89,13 +93,33 @@ export default function StudentRegistration() {
           </div>
         </div>
 
+        {selectedTier && (
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Your Weekly Summary</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-indigo-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600">Weekly Interest</p>
+                <p className="text-xl font-bold text-indigo-600">
+                  <NairaIcon />{calculateWeeklyInterest({ id: '', name: '', tier: selectedTier, joinedAt: new Date(), weeklyInterest: 0, totalAmount: 0 }).toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600">Total Amount</p>
+                <p className="text-xl font-bold text-green-600">
+                  <NairaIcon />{calculateTotalAmount({ id: '', name: '', tier: selectedTier, joinedAt: new Date(), weeklyInterest: 0, totalAmount: 0 }).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
             {error}
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
           className={`w-full py-4 px-6 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors ${
@@ -105,7 +129,7 @@ export default function StudentRegistration() {
           }`}
         >
           {isSubmitting ? 'Joining...' : 'Join Savings Group'}
-        </button>
+        </Button>
       </form>
     </div>
   );
